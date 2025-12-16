@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Search PIN Code</title>
+  <meta name="description" content="Search Indian PIN Codes by State, District and Post Office">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -11,16 +12,27 @@
 
 <h2>Search PIN Code</h2>
 
-<input 
-  type="text" 
-  id="searchInput" 
-  placeholder="Enter PIN / Post Office / District / State">
+<div class="filters">
+  <select id="stateSelect">
+    <option value="">Select State</option>
+  </select>
+
+  <select id="districtSelect">
+    <option value="">Select District</option>
+  </select>
+
+  <select id="officeSelect">
+    <option value="">Select Post Office</option>
+  </select>
+</div>
 
 <table>
   <thead>
     <tr>
       <th>PIN Code</th>
       <th>Post Office</th>
+      <th>Office Type</th>
+      <th>Delivery</th>
       <th>District</th>
       <th>State</th>
     </tr>
@@ -29,6 +41,5 @@
 </table>
 
 <script src="script.js"></script>
-
 </body>
 </html>
