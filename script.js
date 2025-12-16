@@ -1,71 +1,107 @@
 fetch("pincode.csv")
-  .then(res => res.text())
+  .then(response => response.text())
   .then(text => {
 
-    const rows = text.trim().split("\n").slice(1).map(r => r.split(","));
-    const tbody = document.getElementById("tableBody");
+    const data = text.trim().split("\n").slice(1).map(r => r.split(","));
+
     const stateSelect = document.getElementById("stateSelect");
     const districtSelect = document.getElementById("districtSelect");
     const searchInput = document.getElementById("searchInput");
+    const tableBody = document.getElementById("tableBody");
 
-    // Index mapping
-    const IDX = {
+    // Column index mapping
+    const COL = {
       office: 0,
       pincode: 1,
-      type: 2,
+      officetype: 2,
       delivery: 3,
       district: 4,
       state: 5
     };
 
-    // Populate States
-    [...new Set(rows.map(r => r[IDX.state]))].sort().forEach(state => {
+    /* -------------------------
+       Populate State Dropdown
+    --------------------------*/
+    const states = [...new Set(data.map(r => r[COL.state]))].sort();
+    states.forEach(state => {
       stateSelect.innerHTML += `<option value="${state}">${state}</option>`;
     });
 
+    /* -------------------------
+       On State Change
+    --------------------------*/
     stateSelect.addEventListener("change", () => {
+
       districtSelect.innerHTML = `<option value="">Select District</option>`;
-      [...new Set(
-        rows.filter(r => r[IDX.state] === stateSelect.value)
-            .map(r => r[IDX.district])
-      )].sort().forEach(d => {
+      searchInput.value = "";
+      tableBody.innerHTML = "";
+
+      if (stateSelect.value === "") return;
+
+      const districts = [...new Set(
+        data
+          .filter(r => r[COL.state] === stateSelect.value)
+          .map(r => r[COL.district])
+      )].sort();
+
+      districts.forEach(d => {
         districtSelect.innerHTML += `<option value="${d}">${d}</option>`;
       });
-      render();
+
+      renderResults();
     });
 
-    districtSelect.addEventListener("change", render);
-    searchInput.addEventListener("input", debounce(render, 300));
+    /* -------------------------
+       On District Change
+    --------------------------*/
+    districtSelect.addEventListener("change", () => {
+      renderResults();
+    });
 
-    function render() {
-      tbody.innerHTML = "";
+    /* -------------------------
+       On Search Input
+    --------------------------*/
+    let timer;
+    searchInput.addEventListener("input", () => {
+      clearTimeout(timer);
+      timer = setTimeout(renderResults, 300);
+    });
+
+    /* -------------------------
+       Render Table
+    --------------------------*/
+    function renderResults() {
+
+      tableBody.innerHTML = "";
       let count = 0;
 
-      rows.forEach(r => {
+      const keyword = searchInput.value.toLowerCase();
+
+      data.forEach(r => {
+
         if (
-          (stateSelect.value === "" || r[IDX.state] === stateSelect.value) &&
-          (districtSelect.value === "" || r[IDX.district] === districtSelect.value) &&
-          (r.join(" ").toLowerCase().includes(searchInput.value.toLowerCase()))
+          (stateSelect.value === "" || r[COL.state] === stateSelect.value) &&
+          (districtSelect.value === "" || r[COL.district] === districtSelect.value) &&
+          r.join(" ").toLowerCase().includes(keyword)
         ) {
-          tbody.innerHTML += `
-            <tr>
-              <td>${r[IDX.office]}</td>
-              <td>${r[IDX.pincode]}</td>
-              <td>${r[IDX.type]}</td>
-              <td>${r[IDX.delivery]}</td>
-              <td>${r[IDX.district]}</td>
-              <td>${r[IDX.state]}</td>
-            </tr>`;
-          if (++count >= 100) return;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${r[COL.office]}</td>
+            <td>${r[COL.pincode]}</td>
+            <td>${r[COL.officetype]}</td>
+            <td>${r[COL.delivery]}</td>
+            <td>${r[COL.district]}</td>
+            <td>${r[COL.state]}</td>
+          `;
+          tableBody.appendChild(tr);
+
+          count++;
+          if (count >= 100) return;
         }
       });
     }
 
-    function debounce(fn, delay) {
-      let t;
-      return () => {
-        clearTimeout(t);
-        t = setTimeout(fn, delay);
-      };
-    }
+  })
+  .catch(err => {
+    console.error("Error loading CSV:", err);
   });
