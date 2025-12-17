@@ -1,7 +1,12 @@
 body {
   font-family: system-ui, Arial;
   margin: 20px;
-  background: #f8f9fa;
+  background: #f4f6f9;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 h1 {
@@ -10,20 +15,20 @@ h1 {
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
   margin-bottom: 15px;
 }
 
-select, input {
-  padding: 8px;
+select {
+  padding: 10px;
   font-size: 14px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  background: #fff;
+  background: white;
 }
 
 th {
@@ -32,10 +37,12 @@ th {
 }
 
 th, td {
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ddd;
 }
 
-tr:hover {
-  background: #f1f1f1;
+footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
 }

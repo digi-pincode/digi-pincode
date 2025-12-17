@@ -2,19 +2,54 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>India PIN Code & DIGIPIN Finder</title>
+  <title>India PIN Code Finder | Search Post Office & PIN Code</title>
+  <meta name="description" content="Search Indian PIN Codes by State, District and Post Office. Fast and accurate PIN Code directory.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <h1>India PIN Code & DIGIPIN Finder</h1>
 
-  <p>
-    Search Indian PIN Codes and generate DIGIPIN using the official India Post website.
-  </p>
+<header>
+  <h1>India PIN Code Finder</h1>
+  <p>Search PIN Codes by State, District and Post Office</p>
+</header>
 
-  <a href="search.html" class="btn">🔍 Search PIN Code</a>
-  <a href="digipin.html" class="btn">📍 Find DIGIPIN</a>
+<section class="filters">
+  <select id="stateSelect">
+    <option value="">Select State</option>
+  </select>
+
+  <select id="districtSelect">
+    <option value="">Select District</option>
+  </select>
+
+  <select id="officeSelect">
+    <option value="">Select Post Office</option>
+  </select>
+</section>
+
+<table>
+  <thead>
+    <tr>
+      <th>Post Office</th>
+      <th>PIN Code</th>
+      <th>Office Type</th>
+      <th>Delivery</th>
+      <th>District</th>
+      <th>State</th>
+    </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
+<footer>
+  <a href="about.html">About</a> |
+  <a href="digipin.html">What is DIGIPIN</a> |
+  <a href="privacy.html">Privacy Policy</a> |
+  <a href="contact.html">Contact</a>
+</footer>
+
+<script src="script.js"></script>
 </body>
 </html>
