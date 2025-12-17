@@ -2,7 +2,12 @@ fetch("pincode.csv")
   .then(res => res.text())
   .then(text => {
 
-    const rows = text.trim().split("\n").slice(1).map(r => r.split(","));
+    // IMPORTANT: TAB separated CSV
+    const rows = text
+      .trim()
+      .split("\n")
+      .slice(1)
+      .map(r => r.split("\t").map(v => v.trim()));
 
     const stateSelect = document.getElementById("stateSelect");
     const districtSelect = document.getElementById("districtSelect");
@@ -18,13 +23,13 @@ fetch("pincode.csv")
       state: 5
     };
 
-    /* Populate State */
-    [...new Set(rows.map(r => r[COL.state]))].sort()
-      .forEach(state => {
-        stateSelect.innerHTML += `<option value="${state}">${state}</option>`;
-      });
+    /* ---------- Populate State ---------- */
+    const states = [...new Set(rows.map(r => r[COL.state]))].sort();
+    states.forEach(s => {
+      stateSelect.innerHTML += `<option value="${s}">${s}</option>`;
+    });
 
-    /* On State Change */
+    /* ---------- State Change ---------- */
     stateSelect.addEventListener("change", () => {
       reset(districtSelect, "Select District");
       reset(officeSelect, "Select Post Office");
@@ -32,51 +37,61 @@ fetch("pincode.csv")
 
       if (!stateSelect.value) return;
 
-      [...new Set(
-        rows.filter(r => r[COL.state] === stateSelect.value)
-            .map(r => r[COL.district])
-      )].sort().forEach(d =>
-        districtSelect.innerHTML += `<option value="${d}">${d}</option>`
-      );
+      const districts = [...new Set(
+        rows
+          .filter(r => r[COL.state] === stateSelect.value)
+          .map(r => r[COL.district])
+      )].sort();
+
+      districts.forEach(d => {
+        districtSelect.innerHTML += `<option value="${d}">${d}</option>`;
+      });
     });
 
-    /* On District Change */
+    /* ---------- District Change ---------- */
     districtSelect.addEventListener("change", () => {
       reset(officeSelect, "Select Post Office");
       tableBody.innerHTML = "";
 
       if (!districtSelect.value) return;
 
-      rows.filter(r =>
-        r[COL.state] === stateSelect.value &&
-        r[COL.district] === districtSelect.value
-      ).forEach(r =>
-        officeSelect.innerHTML += `<option value="${r[COL.office]}">${r[COL.office]}</option>`
-      );
+      rows
+        .filter(r =>
+          r[COL.state] === stateSelect.value &&
+          r[COL.district] === districtSelect.value
+        )
+        .forEach(r => {
+          officeSelect.innerHTML +=
+            `<option value="${r[COL.office]}">${r[COL.office]}</option>`;
+        });
     });
 
-    /* On Office Change */
+    /* ---------- Office Change ---------- */
     officeSelect.addEventListener("change", () => {
       tableBody.innerHTML = "";
 
-      rows.filter(r =>
-        r[COL.state] === stateSelect.value &&
-        r[COL.district] === districtSelect.value &&
-        r[COL.office] === officeSelect.value
-      ).forEach(r => {
-        tableBody.innerHTML += `
-          <tr>
-            <td>${r[COL.office]}</td>
-            <td>${r[COL.pincode]}</td>
-            <td>${r[COL.officetype]}</td>
-            <td>${r[COL.delivery]}</td>
-            <td>${r[COL.district]}</td>
-            <td>${r[COL.state]}</td>
-          </tr>`;
-      });
+      rows
+        .filter(r =>
+          r[COL.state] === stateSelect.value &&
+          r[COL.district] === districtSelect.value &&
+          r[COL.office] === officeSelect.value
+        )
+        .forEach(r => {
+          tableBody.innerHTML += `
+            <tr>
+              <td>${r[COL.office]}</td>
+              <td>${r[COL.pincode]}</td>
+              <td>${r[COL.officetype]}</td>
+              <td>${r[COL.delivery]}</td>
+              <td>${r[COL.district]}</td>
+              <td>${r[COL.state]}</td>
+            </tr>
+          `;
+        });
     });
 
     function reset(select, text) {
       select.innerHTML = `<option value="">${text}</option>`;
     }
-  });
+  })
+  .catch(err => console.error("CSV load error:", err));
