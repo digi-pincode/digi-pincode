@@ -2,12 +2,14 @@ fetch("pincode.csv")
   .then(res => res.text())
   .then(text => {
 
-    // IMPORTANT: TAB separated CSV
-    const rows = text
-      .trim()
-      .split("\n")
+    // Remove BOM and split lines
+    const lines = text.replace(/\ufeff/g, "").trim().split("\n");
+
+    // Parse TSV safely and ignore bad rows
+    const rows = lines
       .slice(1)
-      .map(r => r.split("\t").map(v => v.trim()));
+      .map(line => line.split("\t").map(v => v.trim()))
+      .filter(r => r.length >= 6 && r[5]); // state must exist
 
     const stateSelect = document.getElementById("stateSelect");
     const districtSelect = document.getElementById("districtSelect");
@@ -24,9 +26,15 @@ fetch("pincode.csv")
     };
 
     /* ---------- Populate State ---------- */
-    const states = [...new Set(rows.map(r => r[COL.state]))].sort();
-    states.forEach(s => {
-      stateSelect.innerHTML += `<option value="${s}">${s}</option>`;
+    const states = [...new Set(rows.map(r => r[COL.state]))]
+      .filter(s => s && s !== "undefined")
+      .sort();
+
+    states.forEach(state => {
+      const opt = document.createElement("option");
+      opt.value = state;
+      opt.textContent = state;
+      stateSelect.appendChild(opt);
     });
 
     /* ---------- State Change ---------- */
@@ -41,10 +49,11 @@ fetch("pincode.csv")
         rows
           .filter(r => r[COL.state] === stateSelect.value)
           .map(r => r[COL.district])
+          .filter(Boolean)
       )].sort();
 
       districts.forEach(d => {
-        districtSelect.innerHTML += `<option value="${d}">${d}</option>`;
+        districtSelect.appendChild(new Option(d, d));
       });
     });
 
@@ -61,8 +70,9 @@ fetch("pincode.csv")
           r[COL.district] === districtSelect.value
         )
         .forEach(r => {
-          officeSelect.innerHTML +=
-            `<option value="${r[COL.office]}">${r[COL.office]}</option>`;
+          officeSelect.appendChild(
+            new Option(r[COL.office], r[COL.office])
+          );
         });
     });
 
@@ -77,7 +87,7 @@ fetch("pincode.csv")
           r[COL.office] === officeSelect.value
         )
         .forEach(r => {
-          tableBody.innerHTML += `
+          tableBody.insertAdjacentHTML("beforeend", `
             <tr>
               <td>${r[COL.office]}</td>
               <td>${r[COL.pincode]}</td>
@@ -86,12 +96,12 @@ fetch("pincode.csv")
               <td>${r[COL.district]}</td>
               <td>${r[COL.state]}</td>
             </tr>
-          `;
+          `);
         });
     });
 
-    function reset(select, text) {
-      select.innerHTML = `<option value="">${text}</option>`;
+    function reset(select, label) {
+      select.innerHTML = `<option value="">${label}</option>`;
     }
   })
-  .catch(err => console.error("CSV load error:", err));
+  .catch(err => console.error("CSV error:", err));
